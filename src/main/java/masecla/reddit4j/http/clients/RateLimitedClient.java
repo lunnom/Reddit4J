@@ -21,7 +21,6 @@ public class RateLimitedClient extends GenericHttpClient {
         this.bucket = Bucket.builder()
                 .addLimit(limit -> limit.capacity(10000).refillIntervally(10000, Duration.ofMinutes(10)))
                 .build();
-        bucket.addTokens(10000);
     }
 
     public boolean allowRequest() {
@@ -32,9 +31,9 @@ public class RateLimitedClient extends GenericHttpClient {
     public Response execute(Connection connection) throws IOException, InterruptedException {
         while (!allowRequest()) {
             //wait until we can execute the request
-            Thread.sleep(100);
+            Thread.sleep(1000);
         }
-        return execute(connection);
+        return connection.execute();
     }
 
 }
