@@ -19,8 +19,9 @@ public class RateLimitedClient extends GenericHttpClient {
     public RateLimitedClient() {
         super();
         this.bucket = Bucket.builder()
-                .addLimit(limit -> limit.capacity(10000).refillGreedy(10000, Duration.ofMinutes(10)))
+                .addLimit(limit -> limit.capacity(10000).refillIntervally(10000, Duration.ofMinutes(10)))
                 .build();
+        bucket.addTokens(10000);
     }
 
     public boolean allowRequest() {
