@@ -1,14 +1,19 @@
 package masecla.reddit4j.requests;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import masecla.reddit4j.client.Reddit4J;
 import masecla.reddit4j.exceptions.AuthenticationException;
-import masecla.reddit4j.objects.RedditThing;
 import masecla.reddit4j.objects.RedditNameable;
+import masecla.reddit4j.objects.RedditThing;
+import masecla.reddit4j.objects.adapters.DimensionAdapter;
+import masecla.reddit4j.objects.preferences.enums.Language;
+import masecla.reddit4j.objects.subreddit.UserFlairRichText;
 import org.jsoup.Connection;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,12 +48,18 @@ public abstract class AbstractListingEndpointRequest<T extends RedditThing & Red
         Connection.Response rsp = conn.execute();
         JsonArray array = JsonParser.parseString(preprocess(rsp.body())).getAsJsonObject().getAsJsonObject("data")
                 .getAsJsonArray("children");
-        Gson gson = new Gson();
+        Gson gson = getGson();
 
         List<T> result = new ArrayList<>();
         array.forEach(c -> {
-            T value = gson.fromJson(c.getAsJsonObject(), clazz);
-            result.add(value);
+            var jsonObject = c.getAsJsonObject();
+            if (jsonObject.has("data") && jsonObject.has("kind")) {
+                T value = gson.fromJson(jsonObject.getAsJsonObject("data"), clazz);
+                result.add(value);
+            } else {
+                T value = gson.fromJson(c.getAsJsonObject(), clazz);
+                result.add(value);
+            }
         });
         return result;
     }
@@ -106,5 +117,13 @@ public abstract class AbstractListingEndpointRequest<T extends RedditThing & Red
             conn.data("show", "all");
 
         return conn;
+    }
+
+    public Gson getGson() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(Language.class, Language.getAdapter());
+        builder.registerTypeAdapter(UserFlairRichText.class, UserFlairRichText.getAdapter());
+        builder.registerTypeAdapter(Dimension.class, new DimensionAdapter());
+        return builder.create();
     }
 }

@@ -12,7 +12,6 @@ import org.jsoup.Connection;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SubredditPostListingEndpointRequest extends AbstractListingEndpointRequest<RedditPost, SubredditPostListingEndpointRequest> {
     private Time time;
@@ -33,13 +32,13 @@ public class SubredditPostListingEndpointRequest extends AbstractListingEndpoint
         TypeToken<?> ttData = TypeToken.getParameterized(RedditData.class, ttListing.getType());
 
         Gson gson = new Gson();
-
         RedditData<RedditListing<RedditData<RedditPost>>> fromJson = gson.fromJson(rsp.body(), ttData.getType());
 
         return fromJson.getData().getChildren().stream()
+                .parallel()
                 .map(RedditData::getData)
-                .peek(redditPost -> redditPost.setClient(this.client))
-                .collect(Collectors.toList());
+                .map(redditPost -> redditPost.setClient(this.client))
+                .toList();
     }
 
     @Override

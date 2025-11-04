@@ -5,29 +5,29 @@ import masecla.reddit4j.requests.RedditUserCommentListingEndpointRequest;
 import masecla.reddit4j.requests.SubredditPostListingEndpointRequest;
 
 public class RedditUser extends RedditThing implements RedditUserActions, RedditNameable {
-	private Reddit4J client;
+    private Reddit4J client;
 
-	private String name;
+    private String name;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public SubredditPostListingEndpointRequest submitted() {
-		return this.client.getUserSubmitted(this.name);
-	}
+    @Override
+    public SubredditPostListingEndpointRequest submitted() {
+        return this.client.getUserSubmitted(this.name);
+    }
 
-	@Override
-	public RedditUserCommentListingEndpointRequest comments() {
-		return this.client.getUserComments(this.name);
-	}
+    @Override
+    public RedditUserCommentListingEndpointRequest comments() {
+        return this.client.getUserComments(this.name);
+    }
 
-	public void setClient(Reddit4J client) {
-		this.client = client;
-	}
+    public void setClient(Reddit4J client) {
+        this.client = client;
+    }
 }

@@ -1,16 +1,16 @@
 package masecla.reddit4j.objects.subreddit;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import masecla.reddit4j.objects.RedditNameable;
 import masecla.reddit4j.objects.RedditThing;
 
 import java.util.List;
 import java.util.Map;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class RedditSearch extends RedditThing implements RedditNameable {
     @SerializedName("approved_at_utc")
     private Object approvedAtUtc;

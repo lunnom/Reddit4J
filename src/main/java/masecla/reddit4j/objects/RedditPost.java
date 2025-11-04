@@ -27,13 +27,13 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
      * the CSS class of the author's flair. subreddit specific
      */
     @SerializedName("author_flair_css_class")
-	private String authorFlairCssClass;
+    private String authorFlairCssClass;
 
     /**
      * the text of the author's flair. subreddit specific
      */
     @SerializedName("author_flair_text")
-	private String authorFlairText;
+    private String authorFlairText;
 
     /**
      * true if the current user has already clicked on this link.
@@ -54,7 +54,7 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
      * true if this link is a selfpost
      */
     @SerializedName("is_self")
-	private boolean is_self;
+    private boolean is_self;
 
     /**
      * how the logged-in user has voted on the link - True = upvoted, False = downvoted, null = no vote
@@ -65,13 +65,13 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
      * the CSS class of the link's flair.
      */
     @SerializedName("link_flair_css_class")
-	private String linkFlairCssClass;
+    private String linkFlairCssClass;
 
     /**
      * the text of the link's flair.
      */
     @SerializedName("link_flair_text")
-	private String linkFlairText;
+    private String linkFlairText;
 
     /**
      * whether the link is locked (closed to new comments) or not.
@@ -83,23 +83,26 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
      */
     private Object media;
 
+    @SerializedName("media_metadata")
+    private Object mediaMetadata;
+
     /**
      * Used for streaming video. Technical embed specific information is found here.
      */
     @SerializedName("media_embed")
-	private Object mediaEmbed;
+    private Object mediaEmbed;
 
     /**
      * the number of comments that belong to this link. includes removed comments.
      */
     @SerializedName("num_comments")
-	private int numComments;
+    private int numComments;
 
     /**
      * true if the post is tagged as NSFW. False if otherwise
      */
     @SerializedName("over_18")
-	private boolean over18;
+    private boolean over18;
 
     /**
      * relative URL of the permanent link for this link
@@ -125,7 +128,7 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
      * the formatted escaped HTML text. this is the HTML formatted version of the marked up text. Items that are boldened by ** or *** will now have <em> or *** tags on them. Additionally, bullets and numbered lists will now be in HTML list format. NOTE: The HTML string will be escaped. You must unescape to get the raw HTML. Null if not present.
      */
     @SerializedName("selftext_html")
-	private String selftextHtml;
+    private String selftextHtml;
 
     /**
      * subreddit of thing excluding the /r/ prefix. "pics"
@@ -136,7 +139,7 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
      * the id of the subreddit in which the thing is located
      */
     @SerializedName("subreddit_id")
-	private String subredditId;
+    private String subredditId;
 
     /**
      * full URL to the thumbnail for this link; "self" if this is a self post; "image" if this is a link to an image but has no thumbnail; "default" if a thumbnail is not available
@@ -170,7 +173,7 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
     private boolean stickied;
 
     @SerializedName("author_fullname")
-	private String authorFullname;
+    private String authorFullname;
 
     private String modReasonTitle;
     private int gilded;
@@ -180,14 +183,14 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
 
     /**
      * The number of upvotes. (includes own).
-     *
+     * <p>
      * https://github.com/reddit-archive/reddit/wiki/JSON#votable-implementation
      */
     private int ups;
 
     /**
      * The number of downvotes. (includes own).
-     *
+     * <p>
      * https://github.com/reddit-archive/reddit/wiki/JSON#votable-implementation
      */
     private int downs;
@@ -195,25 +198,28 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
     /**
      * true if thing is liked by the user, false if thing is disliked, null if the user has not voted or you are not logged in.
      * Certain languages such as Java may need to use a boolean wrapper that supports null assignment.
-     *
+     * <p>
      * https://github.com/reddit-archive/reddit/wiki/JSON#votable-implementation
      */
     private Boolean liked;
 
     /**
      * The time of creation in local epoch-second format. ex: 1331042771.0
-     *
+     * <p>
      * https://github.com/reddit-archive/reddit/wiki/JSON#created-implementation
      */
     private long created;
 
     /**
      * The time of creation in UTC epoch-second format. Note that neither of these ever have a non-zero fraction.
-     *
+     * <p>
      * https://github.com/reddit-archive/reddit/wiki/JSON#created-implementation
      */
     @SerializedName("created_utc")
-	private long createdUtc;
+    private long createdUtc;
+
+    @SerializedName("is_gallery")
+    private Boolean isGallery;
 
     @Override
     public void upvote() throws IOException, InterruptedException {
@@ -280,7 +286,8 @@ public class RedditPost extends RedditThing implements RedditPostActions, Reddit
         this.client.unspoiler(this.name);
     }
 
-    public void setClient(Reddit4J client) {
+    public RedditPost setClient(Reddit4J client) {
         this.client = client;
+        return this;
     }
 }

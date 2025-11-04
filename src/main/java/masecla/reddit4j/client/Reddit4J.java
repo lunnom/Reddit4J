@@ -1,44 +1,28 @@
 package masecla.reddit4j.client;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.net.HttpURLConnection;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import masecla.reddit4j.objects.KarmaBreakdown;
-import masecla.reddit4j.objects.RedditData;
-import masecla.reddit4j.objects.RedditListing;
-import masecla.reddit4j.objects.RedditPost;
-import masecla.reddit4j.objects.RedditProfile;
-import masecla.reddit4j.objects.RedditTrophy;
-import masecla.reddit4j.objects.RedditUser;
-import masecla.reddit4j.objects.Sorting;
-import masecla.reddit4j.objects.Vote;
+import masecla.reddit4j.exceptions.AuthenticationException;
+import masecla.reddit4j.http.GenericHttpClient;
+import masecla.reddit4j.http.clients.RateLimitedClient;
+import masecla.reddit4j.objects.*;
+import masecla.reddit4j.objects.preferences.RedditPreferences;
+import masecla.reddit4j.objects.subreddit.RedditSubreddit;
 import masecla.reddit4j.requests.*;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import masecla.reddit4j.exceptions.AuthenticationException;
-import masecla.reddit4j.http.GenericHttpClient;
-import masecla.reddit4j.http.clients.RateLimitedClient;
-import masecla.reddit4j.objects.preferences.RedditPreferences;
-import masecla.reddit4j.objects.subreddit.RedditSubreddit;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.net.HttpURLConnection;
+import java.time.Instant;
+import java.util.*;
 
 public class Reddit4J {
 
@@ -146,7 +130,6 @@ public class Reddit4J {
         // The token is expired
         if (Instant.now().getEpochSecond() > expirationDate) {
             connect();
-            return;
         }
     }
 
@@ -175,6 +158,10 @@ public class Reddit4J {
 
     public RedditPreferencesUpdateRequest updatePreferences() {
         return new RedditPreferencesUpdateRequest(this);
+    }
+
+    public RedditSubredditListingEndpointRequest getSubscribedSubreddits() {
+        return new RedditSubredditListingEndpointRequest("/subreddits/mine/subscriber", this);
     }
 
     public RedditUserListingEndpointRequest getBlocked() {
@@ -277,8 +264,9 @@ public class Reddit4J {
 
     /**
      * Vote on a Votable thing.
+     *
      * @param fullNameId The t1_ or t3_ full name of the thing to vote on
-     * @param vote UP, DOWN or CLEAR
+     * @param vote       UP, DOWN or CLEAR
      * @throws IOException
      * @throws InterruptedException
      */
@@ -298,6 +286,7 @@ public class Reddit4J {
     /**
      * Hide a link.
      * This removes it from the user's default view of subreddit listings.
+     *
      * @param ids Fullnames
      * @see #unhide(String...)
      */
@@ -310,6 +299,7 @@ public class Reddit4J {
 
     /**
      * Unhide a link.
+     *
      * @param ids Fullnames
      * @see #hide(String...)
      */
@@ -323,6 +313,7 @@ public class Reddit4J {
     /**
      * Lock a link or comment.
      * Prevents a post or new child comments from receiving new comments.
+     *
      * @param id fullname of the thing
      * @see #unlock(String)
      */
@@ -336,6 +327,7 @@ public class Reddit4J {
     /**
      * Unlock a link or comment.
      * Allow a post or comment to receive new comments.
+     *
      * @param id fullname of the thing
      * @see #lock(String)
      */
@@ -348,6 +340,7 @@ public class Reddit4J {
 
     /**
      * Mark a link NSFW.
+     *
      * @param id fullname of a thing
      * @throws IOException
      * @throws InterruptedException
@@ -361,6 +354,7 @@ public class Reddit4J {
 
     /**
      * Remove the NSFW marking from a link.
+     *
      * @param id fullname of a thing
      * @throws IOException
      * @throws InterruptedException
@@ -375,11 +369,12 @@ public class Reddit4J {
     /**
      * Save a link or comment.
      * Saved things are kept in the user's saved listing for later perusal.
+     *
      * @param category a category name
-     * @param id fullname of a thing
-     * @see #unsave(String)
+     * @param id       fullname of a thing
      * @throws IOException
      * @throws InterruptedException
+     * @see #unsave(String)
      */
     public void save(String category, String id) throws IOException, InterruptedException {
         Connection connection = useEndpoint("/api/save")
@@ -392,10 +387,11 @@ public class Reddit4J {
     /**
      * Unsave a link or comment.
      * This removes the thing from the user's saved listings as well.
+     *
      * @param id fullname of a thing
-     * @see #save(String, String)
      * @throws IOException
      * @throws InterruptedException
+     * @see #save(String, String)
      */
     public void unsave(String id) throws IOException, InterruptedException {
         Connection connection = useEndpoint("/api/unsave")
@@ -406,6 +402,7 @@ public class Reddit4J {
 
     /**
      * Spoiler a link
+     *
      * @param id fullname of a link
      * @throws IOException
      * @throws InterruptedException
@@ -419,6 +416,7 @@ public class Reddit4J {
 
     /**
      * Unspoiler a link
+     *
      * @param id fullname of a link
      * @throws IOException
      * @throws InterruptedException
@@ -439,6 +437,7 @@ public class Reddit4J {
     /**
      * Subscribe to a subreddit.
      * The user must have access to the subreddit to be able to subscribe to it.
+     *
      * @param subreddit
      */
     public void subscribe(String subreddit) throws IOException, InterruptedException {
@@ -451,6 +450,7 @@ public class Reddit4J {
 
     /**
      * Unsubscribe from a subreddit.
+     *
      * @param subreddit
      */
     public void unsubscribe(String subreddit) throws IOException, InterruptedException {
@@ -509,8 +509,7 @@ public class Reddit4J {
         Connection connection;
         if (authorized) {
             connection = useEndpoint(endpointPath).method(method);
-        }
-        else {
+        } else {
             connection = useUnauthorizedEndpoint(endpointPath).method(method);
         }
         Response response = this.httpClient.execute(connection);
@@ -522,8 +521,7 @@ public class Reddit4J {
         if (authorized) {
             assert limit > 0;
             connection = useEndpoint("/random.json?limit=" + limit);
-        }
-        else {
+        } else {
             connection = useUnauthorizedEndpoint("/random.json");
         }
         Response response = this.httpClient.execute(connection);
@@ -642,8 +640,8 @@ public class Reddit4J {
             String[] newMethods = methodsSet.toArray(new String[0]);
 
             methodsField.set(null, newMethods);
-        } catch(NoSuchFieldException e) {
-        	// we're just on an unsupported platform.
+        } catch (NoSuchFieldException e) {
+            // we're just on an unsupported platform.
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
