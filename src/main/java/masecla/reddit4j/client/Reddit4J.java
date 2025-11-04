@@ -534,13 +534,6 @@ public class Reddit4J {
         return fromJson.getData().getChildren().stream().findFirst().map(RedditData::getData);
     }
 
-    @Deprecated
-    public static Reddit4J unlimited() {
-        Reddit4J result = new Reddit4J();
-        result.httpClient = new masecla.reddit4j.http.clients.UnlimitedClient();
-        return result;
-    }
-
     public Reddit4J setUsername(String username) {
         this.username = username;
         return this;
