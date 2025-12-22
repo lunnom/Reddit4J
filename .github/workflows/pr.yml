@@ -19,5 +19,5 @@ jobs:
           java-version: '25'
           distribution: 'adopt'
           cache: maven
-      - name: Publish package
+      - name: Maven verify
         run: mvn verify
