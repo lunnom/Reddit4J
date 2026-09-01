@@ -1,27 +1,43 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
-name: Java Release
+name: Release to GitHub Packages
 
 on:
   release:
     types: [ created ]
-jobs:
-  build:
 
+jobs:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required for `mvn deploy` to GitHub Packages. Without it the deploy fails with 403
+      # whenever the repository's default workflow permissions are read-only.
+      packages: write
 
     steps:
       - uses: actions/checkout@v6
+
       - name: Set up JDK 25
         uses: actions/setup-java@v5
         with:
           java-version: '25'
-          distribution: 'adopt'
+          # 'adopt' is a deprecated alias; 'temurin' is the maintained distribution.
+          distribution: 'temurin'
           cache: maven
-      - name: Set version
-        run: mvn versions:set -DnewVersion=${{github.event.release.tag_name}}
-      - name: Publish package
-        run: mvn --batch-mode deploy
+          # Must match <distributionManagement><repository><id> in pom.xml. setup-java
+          # generates the settings.xml server entry from it.
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_TOKEN
+
+      - name: Set version from the release tag
+        run: mvn -B versions:set -DnewVersion=${{ github.event.release.tag_name }}
+
+      # Publishing a broken release is worse than failing the workflow.
+      - name: Test
+        run: mvn -B verify
+
+      - name: Publish to GitHub Packages
+        run: mvn -B --no-transfer-progress deploy -DskipTests
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
